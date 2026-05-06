@@ -1,0 +1,15 @@
+version: 2
+
+seeds:
+  - name: raw_patients_seed
+    description: "Sample patient data with inconsistent column names (camelCase, abbreviations)"
+  - name: raw_admissions_seed
+    description: "Sample admission data with messy column names"
+  - name: raw_episodes_seed
+    description: "Sample episode data with abbreviated/mixed column names"
+  - name: raw_visits_seed
+    description: "Sample visit data with camelCase and abbreviations"
+  - name: raw_facilities_seed
+    description: "Sample facility data with prefix-heavy column naming"
+  - name: raw_staff_seed
+    description: "Sample staff data with inconsistent naming patterns"

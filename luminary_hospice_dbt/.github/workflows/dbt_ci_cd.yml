@@ -1,0 +1,123 @@
+name: dbt CI/CD - Luminary Hospice
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'tests/**'
+      - 'dbt_project.yml'
+      - 'packages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'models/**'
+      - 'macros/**'
+      - 'seeds/**'
+      - 'tests/**'
+      - 'dbt_project.yml'
+      - 'packages.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+  DBT_PROJECT_NAME: luminary_hospice
+  DEV_DATABASE: LUMINARY_HOSPICE_DEV
+  PROD_DATABASE: LUMINARY_HOSPICE_PROD
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # CI: Validate and test dbt changes on Pull Requests
+  # ──────────────────────────────────────────────────────────
+  dbt-ci:
+    name: "CI - Validate dbt changes"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2
+        with:
+          use-oidc: true
+          cli-version: "3.16"
+          default-config-file-path: "config.toml"
+
+      - name: Verify Snowflake connection
+        run: snow connection test -x
+
+      - name: Deploy CI dbt project
+        run: |
+          snow dbt deploy ${DBT_PROJECT_NAME}_ci_pr${{ github.event.pull_request.number }} \
+            --source . \
+            --default-target dev \
+            --force
+
+      - name: Run dbt deps
+        run: |
+          snow dbt execute ${DBT_PROJECT_NAME}_ci_pr${{ github.event.pull_request.number }} \
+            --args "deps"
+
+      - name: Run dbt build (run + test)
+        run: |
+          snow dbt execute ${DBT_PROJECT_NAME}_ci_pr${{ github.event.pull_request.number }} \
+            --args "build --target dev"
+
+      - name: Cleanup - Drop CI project
+        if: always()
+        run: |
+          snow sql -q "DROP DBT PROJECT IF EXISTS ${DEV_DATABASE}.PUBLIC.${DBT_PROJECT_NAME}_CI_PR${{ github.event.pull_request.number }};" -x
+
+  # ──────────────────────────────────────────────────────────
+  # CD: Deploy to Production on merge to main
+  # ──────────────────────────────────────────────────────────
+  dbt-deploy-prod:
+    name: "CD - Deploy to Production"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v2
+        with:
+          use-oidc: true
+          cli-version: "3.16"
+          default-config-file-path: "config.toml"
+
+      - name: Verify Snowflake connection
+        run: snow connection test -x
+
+      - name: Deploy dbt project to Production
+        run: |
+          snow dbt deploy ${DBT_PROJECT_NAME} \
+            --source . \
+            --default-target prod \
+            --force
+
+      - name: Run dbt deps in Production
+        run: |
+          snow dbt execute ${DBT_PROJECT_NAME} \
+            --args "deps"
+
+      - name: Run dbt build in Production
+        run: |
+          snow dbt execute ${DBT_PROJECT_NAME} \
+            --args "build --target prod"
+
+      - name: Verify deployment
+        run: |
+          snow sql -q "SHOW DBT PROJECTS LIKE '${DBT_PROJECT_NAME}' IN DATABASE ${PROD_DATABASE};" -x

@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Calendar dimension with fiscal year alignment (Oct-Sep), date range 2000-2035"
+    columns:
+      - name: pk_date
+        description: "Primary key - SHA2 hash of date_day + calendar"
+        tests:
+          - not_null
+          - unique
+      - name: date_day
+        description: "Calendar date"
+        tests:
+          - not_null
+          - unique
+      - name: month_start_date
+        tests:
+          - not_null
+      - name: year_number
+        tests:
+          - not_null
+
+  - name: dim_patients
+    description: "Patient dimension with current-state SCD2 tracking"
+    columns:
+      - name: pk_patient
+        description: "Primary key - SHA2 hash of patient_id"
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        description: "Natural key - MatrixCare patient identifier"
+        tests:
+          - not_null
+          - unique
+      - name: first_name
+        tests:
+          - not_null
+      - name: last_name
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+
+  - name: dim_facilities
+    description: "Facility dimension with bed capacity and region"
+    columns:
+      - name: pk_facility
+        description: "Primary key - SHA2 hash of facility_id"
+        tests:
+          - not_null
+          - unique
+      - name: facility_id
+        description: "Natural key - MatrixCare facility identifier"
+        tests:
+          - not_null
+          - unique
+      - name: facility_name
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+
+  - name: dim_staff
+    description: "Staff dimension by discipline and role"
+    columns:
+      - name: pk_staff
+        description: "Primary key - SHA2 hash of staff_id"
+        tests:
+          - not_null
+          - unique
+      - name: staff_id
+        description: "Natural key - MatrixCare staff identifier"
+        tests:
+          - not_null
+          - unique
+      - name: discipline
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null

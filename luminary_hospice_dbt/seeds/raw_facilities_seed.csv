@@ -1,0 +1,4 @@
+facID,FacilityName,FacTyp,fac_npi,fac_ccn,LicenseNo,Addr1,FacCity,FacState,FacZip,FacCounty,FacPhone,FacFax,TotalBeds,IPU_Beds,FacRegion,fac_status,createDt,modifyDt
+F001,Luminary Hospice - Springfield,FREESTANDING,1111111111,111111,LIC001,100 Hospice Way,SPRINGFIELD,IL,62701,SANGAMON,2175550100,2175550101,20,6,CENTRAL,ACTIVE,2024-01-01 08:00:00,2024-12-01 10:00:00
+F002,Luminary Hospice - Chicago,HOSPITAL_BASED,2222222222,222222,LIC002,200 Care Blvd,CHICAGO,IL,60601,COOK,3125550200,3125550201,35,10,NORTH,ACTIVE,2024-01-01 08:00:00,2025-01-15 09:00:00
+F003,  luminary hospice - peoria  ,  freestanding  ,3333333333,333333,LIC003,  300 Comfort St  ,  peoria  ,  il  ,  61602  ,  peoria  ,3095550300,3095550301,15,4,  central  ,ACTIVE,2024-01-01 08:00:00,2025-02-10 11:00:00

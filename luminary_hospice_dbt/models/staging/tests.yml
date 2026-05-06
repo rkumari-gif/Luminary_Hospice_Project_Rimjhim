@@ -1,0 +1,210 @@
+version: 2
+
+models:
+  - name: stg_patients
+    description: "Staged patient demographics from RAW_PATIENTS"
+    columns:
+      - name: patient_id
+        description: "Primary key - MatrixCare patient identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_episodes
+    description: "Staged hospice episodes from RAW_EPISODES"
+    columns:
+      - name: episode_id
+        description: "Primary key - MatrixCare episode identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_admissions
+    description: "Staged admission events from RAW_ADMISSIONS"
+    columns:
+      - name: admission_id
+        description: "Primary key - MatrixCare admission identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_discharges
+    description: "Staged discharge events from RAW_DISCHARGES"
+    columns:
+      - name: discharge_id
+        description: "Primary key - MatrixCare discharge identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_census
+    description: "Staged daily census snapshots from RAW_CENSUS"
+    columns:
+      - name: census_id
+        description: "Primary key - MatrixCare census record identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_referrals
+    description: "Staged referral pipeline from RAW_REFERRALS"
+    columns:
+      - name: referral_id
+        description: "Primary key - MatrixCare referral identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_facilities
+    description: "Staged facility master data from RAW_FACILITIES"
+    columns:
+      - name: facility_id
+        description: "Primary key - MatrixCare facility identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_staff
+    description: "Staged clinical staff roster from RAW_STAFF"
+    columns:
+      - name: staff_id
+        description: "Primary key - MatrixCare staff identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_visits
+    description: "Staged visit logs from RAW_VISITS"
+    columns:
+      - name: visit_id
+        description: "Primary key - MatrixCare visit identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_billing_claims
+    description: "Staged billing claims from RAW_BILLING_CLAIMS"
+    columns:
+      - name: claim_id
+        description: "Primary key - MatrixCare claim identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_diagnoses
+    description: "Staged ICD-10 diagnoses from RAW_DIAGNOSES"
+    columns:
+      - name: diagnosis_id
+        description: "Primary key - MatrixCare diagnosis identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_care_plans
+    description: "Staged care plans from RAW_CARE_PLANS"
+    columns:
+      - name: care_plan_id
+        description: "Primary key - MatrixCare care plan identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_medications
+    description: "Staged medication orders from RAW_MEDICATIONS"
+    columns:
+      - name: medication_id
+        description: "Primary key - MatrixCare medication identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_clinical_assessments
+    description: "Staged clinical assessments from RAW_CLINICAL_ASSESSMENTS"
+    columns:
+      - name: assessment_id
+        description: "Primary key - MatrixCare assessment identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_budget
+    description: "Staged monthly budget targets from RAW_BUDGET"
+    columns:
+      - name: budget_id
+        description: "Primary key - Budget record identifier"
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_seed_patients
+    description: "Staged patient data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: patient_id
+        description: "Primary key - renamed from PatID"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        description: "Hash key computed at staging from cleaned business columns"
+        tests:
+          - not_null
+
+  - name: stg_seed_admissions
+    description: "Staged admission data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: admission_id
+        description: "Primary key - renamed from admId"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        tests:
+          - not_null
+
+  - name: stg_seed_episodes
+    description: "Staged episode data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: episode_id
+        description: "Primary key - renamed from epId"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        tests:
+          - not_null
+
+  - name: stg_seed_visits
+    description: "Staged visit data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: visit_id
+        description: "Primary key - renamed from visitID"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        tests:
+          - not_null
+
+  - name: stg_seed_facilities
+    description: "Staged facility data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: facility_id
+        description: "Primary key - renamed from facID"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        tests:
+          - not_null
+
+  - name: stg_seed_staff
+    description: "Staged staff data from seed - renames messy columns to clean snake_case"
+    columns:
+      - name: staff_id
+        description: "Primary key - renamed from staffID"
+        tests:
+          - not_null
+          - unique
+      - name: _row_hash
+        tests:
+          - not_null

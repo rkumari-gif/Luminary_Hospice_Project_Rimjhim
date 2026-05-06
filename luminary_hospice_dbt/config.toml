@@ -1,0 +1,6 @@
+default_connection_name = "default"
+
+[connections.default]
+account = ""
+warehouse = "DBT_WH"
+role = "DBT_EXECUTOR_ROLE"

@@ -1,0 +1,44 @@
+name: 'luminary_hospice'
+version: '1.0.0'
+config-version: 2
+
+profile: 'default'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  luminary_hospice:
+    staging:
+      +schema: stg
+      +tags:
+        - staging
+      +materialized: view
+    intermediate:
+      +schema: int
+      +tags:
+        - intermediate
+      +materialized: table
+    marts:
+      +schema: marts
+      +tags:
+        - marts
+      +materialized: table
+      facts:
+        +materialized: incremental
+        +on_schema_change: append_new_columns
+    dimensions:
+      +enabled: false
+    facts:
+      +enabled: false
+
+seeds:
+  +schema: seed_data

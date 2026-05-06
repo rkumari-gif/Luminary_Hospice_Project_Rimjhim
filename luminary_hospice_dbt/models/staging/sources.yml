@@ -1,0 +1,603 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: LUMINARY_HOSPICE
+    schema: BRONZE
+    description: "Raw MatrixCare EMR data share - ingested with minimal transformation"
+    tables:
+      - name: RAW_PATIENTS
+        description: "Patient demographics, payer, and physician data"
+        columns:
+          - name: PATIENT_ID
+            description: "MatrixCare patient identifier"
+          - name: MODIFIED_DATE
+            description: "Last modified timestamp from source"
+      - name: RAW_EPISODES
+        description: "Hospice episodes with certification and benefit period data"
+        columns:
+          - name: EPISODE_ID
+            description: "MatrixCare episode identifier"
+      - name: RAW_ADMISSIONS
+        description: "Admission events linked to referrals and episodes"
+        columns:
+          - name: ADMISSION_ID
+            description: "MatrixCare admission identifier"
+      - name: RAW_DISCHARGES
+        description: "Discharge events with disposition and length of stay"
+        columns:
+          - name: DISCHARGE_ID
+            description: "MatrixCare discharge identifier"
+      - name: RAW_CENSUS
+        description: "Daily patient census snapshots by facility"
+        columns:
+          - name: CENSUS_ID
+            description: "MatrixCare census record identifier"
+      - name: RAW_REFERRALS
+        description: "Referral pipeline with conversion and outcome tracking"
+        columns:
+          - name: REFERRAL_ID
+            description: "MatrixCare referral identifier"
+      - name: RAW_FACILITIES
+        description: "Facility master data with bed capacity"
+        columns:
+          - name: FACILITY_ID
+            description: "MatrixCare facility identifier"
+      - name: RAW_STAFF
+        description: "Clinical staff roster by discipline and role"
+        columns:
+          - name: STAFF_ID
+            description: "MatrixCare staff identifier"
+      - name: RAW_VISITS
+        description: "Visit logs by discipline with timing and mileage"
+        columns:
+          - name: VISIT_ID
+            description: "MatrixCare visit identifier"
+      - name: RAW_BILLING_CLAIMS
+        description: "Claims, payments, and denial tracking"
+        columns:
+          - name: CLAIM_ID
+            description: "MatrixCare claim identifier"
+      - name: RAW_DIAGNOSES
+        description: "ICD-10 diagnosis records linked to episodes"
+        columns:
+          - name: DIAGNOSIS_ID
+            description: "MatrixCare diagnosis identifier"
+      - name: RAW_CARE_PLANS
+        description: "Care plan details with visit frequency and goals"
+        columns:
+          - name: CARE_PLAN_ID
+            description: "MatrixCare care plan identifier"
+      - name: RAW_MEDICATIONS
+        description: "Medication orders with hospice-related flag"
+        columns:
+          - name: MEDICATION_ID
+            description: "MatrixCare medication identifier"
+      - name: RAW_CLINICAL_ASSESSMENTS
+        description: "Clinical assessments including PPS scores"
+        columns:
+          - name: ASSESSMENT_ID
+            description: "MatrixCare assessment identifier"
+      - name: RAW_BUDGET
+        description: "Monthly budget targets by facility for ADC, admissions, revenue"
+        columns:
+          - name: BUDGET_ID
+            description: "Budget record identifier"
+
+  - name: matrixcare
+    database: LUMINARY_HOSPICE
+    schema: BRONZE
+    description: "MatrixCare HHP secure data share tables - clinical, billing, and operational data"
+    tables:
+      - name: DBO_CPC_PA_VISITS
+        description: "Patient visits with timing, discipline, mileage, and status"
+      - name: DBO_CPC_PA_ADMISSION
+        description: "Patient admissions with SOC dates, certification, and episode tracking"
+      - name: DBO_CPC_PA_PATIENT_RECORD
+        description: "Patient master record linking all admissions"
+      - name: DBO_CPC_PA_PATIENT_DEMOGRAPHICS
+        description: "Patient demographics including name, DOB, SSN, gender, language"
+      - name: DBO_CPC_PA_DIAGNOSIS
+        description: "Patient diagnoses (ICD-9/ICD-10) linked to admissions"
+      - name: DBO_CPC_PA_ADMISSION_STATUS
+        description: "Admission status history (Pending, Accepted, In Service, Discharged)"
+      - name: DBO_CPC_PA_VISIT_STATUS
+        description: "Visit status history (Editing, Ready for Review, Accepted, etc.)"
+      - name: DBO_CPC_PA_ADDRESS
+        description: "Patient addresses including care location and legal address"
+      - name: DBO_CPC_PA_PHONE
+        description: "Patient phone numbers and contact preferences"
+      - name: DBO_CPC_PA_INSURANCE
+        description: "Patient insurance records with payor, plan, and policy details"
+      - name: DBO_CPC_PA_REFERRAL
+        description: "Patient referrals with source, physician, and clinical data"
+      - name: DBO_CPC_PA_REFERRAL_ADDINFO
+        description: "Additional referral information fields"
+      - name: DBO_CPC_PA_REFERRAL_PDGM
+        description: "PDGM-related referral data for home health"
+      - name: DBO_CPC_PA_REFERRAL_NOTE
+        description: "Referral narrative notes"
+      - name: DBO_CPC_PA_ORDERS
+        description: "Patient orders (medications, services, disciplines)"
+      - name: DBO_CPC_PA_ORDERS_GROUP
+        description: "Order groups linking related orders with physician and compliance"
+      - name: DBO_CPC_PA_ORDER_STATUS
+        description: "Order status history"
+      - name: DBO_CPC_PA_ORDER_ELEMENTS
+        description: "Order elements (medication, discipline, text components)"
+      - name: DBO_CPC_PA_ORDER_MEDICATION_ELEMENTS
+        description: "Medication order details (drug, dose, route, frequency)"
+      - name: DBO_CPC_PA_ORDER_FREQDUR
+        description: "Order frequency and duration schedules"
+      - name: DBO_CPC_PA_ORDER_APPOINTMENT
+        description: "Scheduled appointments linked to orders"
+      - name: DBO_CPC_PA_ALLERGIES
+        description: "Patient allergy records"
+      - name: DBO_CPC_PA_DNR
+        description: "Do Not Resuscitate status and healthcare proxy"
+      - name: DBO_CPC_PA_AUTHORIZATION
+        description: "Patient insurance authorizations"
+      - name: DBO_CPC_PA_AUTHORIZATION_STATUS
+        description: "Authorization status history"
+      - name: DBO_CPC_PA_AUTHORIZATION_HISTORY
+        description: "Authorization field change audit history"
+      - name: DBO_CPC_PA_AUTH_SERVICES
+        description: "Authorization service details (disciplines, visits, dates)"
+      - name: DBO_CPC_PA_AUTHDISCIPLINE_DETAILS
+        description: "Authorization discipline-level detail"
+      - name: DBO_CPC_PA_AUTH_VISITS
+        description: "Visit authorization compliance records"
+      - name: DBO_CPC_PA_AUTH_VISITS_MANUAL_ASSIGN
+        description: "Manual visit-to-authorization reassignments"
+      - name: DBO_CPC_PA_ASSESS_CHART_NOTES
+        description: "Assessment chart notes (OASIS, agency, wound)"
+      - name: DBO_CPC_PA_ASSESS_CHRTNOTE_ANS
+        description: "Assessment question answers"
+      - name: DBO_CPC_PA_ASSESS_CHRTNOTE_ANSLST
+        description: "Serialized assessment answer lists"
+      - name: DBO_CPC_PA_ASSESS_CHRTNOTE_TRKCHG
+        description: "Assessment version tracking and OASIS correction numbers"
+      - name: DBO_CPC_PA_ASSESS_NOTES
+        description: "Assessment narrative notes"
+      - name: DBO_CPC_PA_VISIT_DATA
+        description: "Visit-level OASIS and clinical data elements"
+      - name: DBO_CPC_PA_VISIT_ITEMS
+        description: "Visit billing items"
+      - name: DBO_CPC_PA_VISIT_SERVICES
+        description: "Visit billing services"
+      - name: DBO_CPC_PA_VITAL_GROUPS
+        description: "Vital sign measurement groups per visit"
+      - name: DBO_CPC_PA_VITAL_SIGNS
+        description: "Individual vital sign readings"
+      - name: DBO_CPC_PA_WOUND_INFO
+        description: "Wound master records with location and type"
+      - name: DBO_CPC_PA_WOUND_ASSESSMENT
+        description: "Wound assessment details (bed, edges, drainage, treatment)"
+      - name: DBO_CPC_PA_WOUND_ASSESSMENT_EXT
+        description: "Extended wound assessment fields"
+      - name: DBO_CPC_PA_SYMPTOM_ASSESSMENT
+        description: "Edmonton Symptom Assessment Scale scores"
+      - name: DBO_CPC_PA_ELIGIBILITYLOG
+        description: "Insurance eligibility verification log"
+      - name: DBO_CPC_PA_ELIGIBILITYALERT
+        description: "Eligibility verification alerts"
+      - name: DBO_CPC_PA_485_DATA
+        description: "Plan of Care (485) document data"
+      - name: DBO_CPC_PA_485_GOALS
+        description: "Plan of Care goals"
+      - name: DBO_CPC_PA_485_INTERVENTIONS
+        description: "Plan of Care interventions"
+      - name: DBO_CPC_PA_485_MEDICATIONS
+        description: "Plan of Care medications"
+      - name: DBO_CPC_PA_485_ORDERS
+        description: "Plan of Care orders"
+      - name: DBO_CPC_PA_485_SELECTION
+        description: "Plan of Care selections"
+      - name: DBO_CPC_PA_485_CHECK
+        description: "Plan of Care checkbox items"
+      - name: DBO_CPC_PA_485_ADVANCEDDIRECTIVES
+        description: "Plan of Care advanced directives"
+      - name: DBO_CPC_PA_485_RISKFACTORS
+        description: "Plan of Care hospitalization risk factors"
+      - name: DBO_CPC_PA_60_DAY
+        description: "60-day recertification summary"
+      - name: DBO_CPC_PA_60_DAY_STATUS
+        description: "60-day summary status history"
+      - name: DBO_CPC_PA_DISCHARGE_SUMMARY
+        description: "Patient discharge summaries"
+      - name: DBO_CPC_PA_DISCHARGE_STATUS
+        description: "Discharge summary status history"
+      - name: DBO_CPC_PA_HHACAREPLAN
+        description: "HHA personal care plans"
+      - name: DBO_CPC_PA_HHACAREPLAN_STATUS
+        description: "HHA care plan status history"
+      - name: DBO_CPC_PA_HHACAREPLANDETAIL
+        description: "HHA care plan activity details"
+      - name: DBO_CPC_PA_CP_DIAGNOSIS
+        description: "Care plan problems/diagnoses"
+      - name: DBO_CPC_PA_CP_DIAGNOSIS_STATUS
+        description: "Care plan diagnosis status history"
+      - name: DBO_CPC_PA_CP_GOAL
+        description: "Care plan goals"
+      - name: DBO_CPC_PA_CP_GOAL_STATUS
+        description: "Care plan goal status and variance tracking"
+      - name: DBO_CPC_PA_CP_GOAL_OUT_PROGRESS
+        description: "Care plan goal/outcome progress per visit"
+      - name: DBO_CPC_PA_CP_OUTCOME
+        description: "Care plan outcomes"
+      - name: DBO_CPC_PA_CP_OUTCOME_STATUS
+        description: "Care plan outcome status history"
+      - name: DBO_CPC_PA_CP_INTERVENTION
+        description: "Care plan interventions"
+      - name: DBO_CPC_PA_CP_INTERVENTION_STATUS
+        description: "Care plan intervention status history"
+      - name: DBO_CPC_PA_CP_INTERVENTION_DISC
+        description: "Care plan intervention discipline associations"
+      - name: DBO_CPC_PA_CP_INTERVENTION_VISIT
+        description: "Care plan intervention visit documentation"
+      - name: DBO_CPC_PA_CP_ELEMENT_TEXT
+        description: "Custom care plan element text"
+      - name: DBO_CPC_PA_PATIENT_RACE
+        description: "Patient race demographics"
+      - name: DBO_CPC_PA_PATIENT_ETNICITY
+        description: "Patient ethnicity demographics"
+      - name: DBO_CPC_PA_PATIENT_ALERTS
+        description: "Patient clinical and administrative alerts"
+      - name: DBO_CPC_PA_PATIENT_ALERT_STATUS
+        description: "Patient alert status history"
+      - name: DBO_CPC_PA_PATIENT_ALERT_COMMENT
+        description: "Patient alert comments"
+      - name: DBO_CPC_PA_PATIENT_TEAMS_ASSOC
+        description: "Patient-to-team assignments"
+      - name: DBO_CPC_PA_PERSONAL_CONTACTS
+        description: "Patient personal contacts (family, caregivers)"
+      - name: DBO_CPC_PA_ASSOC_CONTACTS
+        description: "Patient-to-contact associations (physicians, personal)"
+      - name: DBO_CPC_PA_VACCINATIONS
+        description: "Patient vaccination records"
+      - name: DBO_CPC_PA_VACCINATION_DETAILS
+        description: "Vaccination administration details"
+      - name: DBO_CPC_PA_VACCINATION_ADVERSE_REACTIONS
+        description: "Vaccination adverse reaction records"
+      - name: DBO_CPC_PA_SCANDOCUMENTS
+        description: "Patient scanned document associations"
+      - name: DBO_CPC_PA_ADMISSION_ELB_MAP
+        description: "Admission to Line of Business mapping"
+      - name: DBO_CPC_PA_ADMISSION_HOPESUPPRESSIONS
+        description: "HOPE assessment suppression flags per admission"
+      - name: DBO_CPC_PA_OASIS_HEADER
+        description: "OASIS assessment headers"
+      - name: DBO_CPC_PA_OASIS_DETAILS
+        description: "OASIS assessment item values"
+      - name: DBO_CPC_PA_OASIS_STATUS
+        description: "OASIS assessment status history"
+      - name: DBO_CPC_PA_NOE
+        description: "Notice of Election (NOE/NOA) records"
+      - name: DBO_CPC_PA_CTI_DATA
+        description: "Certification/Recertification (CTI) document data"
+      - name: DBO_CPC_PA_MEASUREMENT_GROUPS
+        description: "Anthropometric measurement groups"
+      - name: DBO_CPC_PA_MEASUREMENT_READINGS
+        description: "Anthropometric measurement readings"
+      - name: DBO_CPC_PA_MEASUREMENT_ITEMS
+        description: "Anthropometric measurement item definitions"
+      - name: DBO_CPC_PA_MEASUREMENT_LOCATIONS
+        description: "Measurement location definitions"
+      - name: DBO_CPC_PA_REFERRALSPECPGMS_ASSOC
+        description: "Referral specialty program associations"
+      - name: DBO_CPC_PA_REFERRAL_QUESTION_PDGM
+        description: "PDGM referral questions"
+      - name: DBO_CPC_NOTES
+        description: "Clinical notes header records"
+      - name: DBO_CPC_CHUNKS
+        description: "Note text chunks (large text storage)"
+      - name: DBO_CPC_NOTES_PHYSICIAN
+        description: "Physician-specific note metadata"
+      - name: DBO_CPC_DOCUMENTS
+        description: "Clinical document records"
+      - name: DBO_CPC_DOCUMENT_STATUS
+        description: "Document status history"
+      - name: DBO_CPC_EMPL_EMPLOYEE
+        description: "Employee master records"
+      - name: DBO_CPC_EMPL_ADDRESS
+        description: "Employee addresses"
+      - name: DBO_CPC_EMPL_PHONE
+        description: "Employee phone numbers"
+      - name: DBO_CPC_EMPL_DISCIPLINES
+        description: "Employee discipline assignments"
+      - name: DBO_CPC_EMPL_PERSONAL_CONTACTS
+        description: "Employee personal contacts"
+      - name: DBO_CPC_EMPL_SCANDOCUMENTS
+        description: "Employee scanned document associations"
+      - name: DBO_CPC_EMPL_TIMEREIMB_TRACKING
+        description: "Employee time and reimbursement entries"
+      - name: DBO_CPC_SA_USERACCOUNTS
+        description: "System user accounts"
+      - name: DBO_CPC_SA_USERACCOUNTS_PWD
+        description: "User account password records"
+      - name: DBO_CPC_SA_USERACCTS_BUSUNIT_ASSOC
+        description: "User-to-business unit privilege associations"
+      - name: DBO_CPC_SA_USERGROUPS
+        description: "Security user groups"
+      - name: DBO_CPC_SA_USERGROUPS_ASSOC
+        description: "User-to-group membership associations"
+      - name: DBO_CPC_SA_USER_HIERARCHY_REPORT
+        description: "User reporting hierarchy access"
+      - name: DBO_CPC_SA_ASSIGNMENT
+        description: "Clinician-to-patient assignments"
+      - name: DBO_CPC_SA_BUSUNIT_HIERARCHY
+        description: "Business unit organizational hierarchy"
+      - name: DBO_CPC_SA_BUSUNIT_PREFERENCES
+        description: "Business unit configuration preferences"
+      - name: DBO_CPC_SA_COMPANY
+        description: "Company master records"
+      - name: DBO_CPC_SA_TEAMS
+        description: "Team definitions"
+      - name: DBO_CPC_SA_TEAMMEMBERS
+        description: "Team member assignments"
+      - name: DBO_CPC_SA_ELB
+        description: "Electronic Line of Business definitions"
+      - name: DBO_CPC_SA_ELB_RULES
+        description: "ELB business rule definitions"
+      - name: DBO_CPC_SA_ELB_RULES_MAP
+        description: "ELB rule-to-LOB value mappings"
+      - name: DBO_CPC_SA_INSPLAN
+        description: "Insurance plan master records"
+      - name: DBO_CPC_SA_PAYORS
+        description: "Insurance payor master records"
+      - name: DBO_CPC_SA_PAYORTYPE_ASSOC
+        description: "Payor type classifications"
+      - name: DBO_CPC_SA_PAYORPLAN_PROVIDER_NUM
+        description: "Provider numbers by payor/plan"
+      - name: DBO_CPC_SA_DIAGNOSIS_ICD10
+        description: "ICD-10 diagnosis code master"
+      - name: DBO_CPC_SA_DIAGNOSIS_ICD9
+        description: "ICD-9 diagnosis code master (legacy)"
+      - name: DBO_CPC_SA_DIAGNOSISVERSION
+        description: "Diagnosis code version effective dates"
+      - name: DBO_CPC_SA_MEDICATIONS
+        description: "Medication master records"
+      - name: DBO_CPC_SA_VACCINE_CODES
+        description: "Vaccine code definitions"
+      - name: DBO_CPC_SA_VACCINE_CODES_LIST_ELEMENTS
+        description: "Vaccine code list element details"
+      - name: DBO_CPC_SA_VITALS
+        description: "Vital sign type definitions"
+      - name: DBO_CPC_SA_VITAL_UNITS
+        description: "Vital sign unit definitions"
+      - name: DBO_CPC_SA_VITAL_PROPERTIES
+        description: "Vital sign property definitions"
+      - name: DBO_CPC_SA_VITAL_PROPERTY_ITEMS
+        description: "Vital sign property item values"
+      - name: DBO_CPC_SA_LISTS
+        description: "System list definitions"
+      - name: DBO_CPC_SA_LISTELEMENTS
+        description: "System list element values (agency-configurable)"
+      - name: DBO_CPC_SA_SCANDOCUMENTS
+        description: "Scanned document file records"
+      - name: DBO_CPC_SA_PRIVILEGES
+        description: "System privilege definitions"
+      - name: DBO_CPC_SA_PRIVILEGEGROUPS
+        description: "System privilege group hierarchy"
+      - name: DBO_CPC_SA_DOCUMENT_SIGN_TRACKER
+        description: "Document signature tracking"
+      - name: DBO_CPC_EHC_LISTELEMENTS
+        description: "System list elements (EHC - shared across agencies)"
+      - name: DBO_CPC_EHC_DISC_CATEGORY_ASSOC
+        description: "Discipline-to-category associations"
+      - name: DBO_CPC_EHC_SCANCONTENTTYPES
+        description: "Scan document content type definitions"
+      - name: DBO_CPC_EHC_ONCRACELIST
+        description: "ONC race code list"
+      - name: DBO_CPC_EHC_ONCETHNICITYLIST
+        description: "ONC ethnicity code list"
+      - name: DBO_CPC_PHYSICIAN
+        description: "Physician master records"
+      - name: DBO_CPC_PHYS_ASSOC_SPECIALTIES
+        description: "Physician specialty associations"
+      - name: DBO_CPC_ORGANIZATION
+        description: "Organization master records (hospitals, facilities)"
+      - name: DBO_CPC_ORG_CONTACTS
+        description: "Organization contact records"
+      - name: DBO_CPC_OTHER_CONTACTS
+        description: "Generic contact records"
+      - name: DBO_CPC_OTHER_PHONE
+        description: "Generic phone records (for addresses, orgs)"
+      - name: DBO_CPC_OTHER_ADDRESS
+        description: "Generic address records (orgs, physicians)"
+      - name: DBO_CPC_CONTACT_ADDRESS
+        description: "Contact-specific address records"
+      - name: DBO_CPC_CONTACT_PHONE
+        description: "Contact-specific phone records"
+      - name: DBO_CPC_BILLING_SERVICE_MASTER
+        description: "Billing service code master"
+      - name: DBO_CPC_BILLING_SERVICE_CATEGORIES
+        description: "Billing service category definitions"
+      - name: DBO_CPC_BILLING_ITEM_MASTER
+        description: "Billing item code master"
+      - name: DBO_CPC_BILLING_ITEM_CATEGORIES
+        description: "Billing item category definitions"
+      - name: DBO_CPC_INTERVAL_BASED_CHARGES
+        description: "Hospice level of care daily charges"
+      - name: DBO_CPC_SCHED_APPT_TYPES
+        description: "Appointment type definitions"
+      - name: DBO_CPC_LABS_CATEGORIES
+        description: "Lab category definitions"
+      - name: DBO_CPC_LABS_ITEMS
+        description: "Lab item definitions"
+      - name: DBO_CPC_LABS_UNITS
+        description: "Lab unit definitions"
+      - name: DBO_CPC_LABS_PROCEDURES
+        description: "Lab procedure definitions"
+      - name: DBO_CPC_LABS_GROUPS
+        description: "Lab reading groups per visit"
+      - name: DBO_CPC_LABS_READINGS
+        description: "Lab reading values"
+      - name: DBO_CPC_HW_ITEMS
+        description: "Height/weight item definitions"
+      - name: DBO_CPC_HW_READINGS
+        description: "Height/weight readings"
+      - name: DBO_CPC_IO_UNITS
+        description: "Intake/output unit definitions"
+      - name: DBO_CPC_IO_ITEMS
+        description: "Intake/output item definitions"
+      - name: DBO_CPC_IO_GROUPS
+        description: "Intake/output reading groups"
+      - name: DBO_CPC_IO_READINGS
+        description: "Intake/output reading values"
+      - name: DBO_CPC_CP_ELEMENT
+        description: "Care plan element library (goals, interventions, outcomes)"
+      - name: DBO_CPC_CP_DIAGNOSIS
+        description: "Care plan problem template library"
+      - name: DBO_CPC_TB_TEMPLATE_INFO
+        description: "Assessment template definitions"
+      - name: DBO_CPC_TB_TEMPLATE_NODES
+        description: "Assessment template question/group nodes"
+      - name: DBO_CPC_TB_TEMPLATE_VISIT_TYPES
+        description: "Template-to-visit type associations"
+      - name: DBO_CPC_TB_QUESTION_MASTER
+        description: "Assessment question master records"
+      - name: DBO_CPC_TB_QUESTION_CONTROLS
+        description: "Assessment question control/answer options"
+      - name: DBO_CPC_TB_QUESTION_CONTROL_GROUP
+        description: "Question control groupings"
+      - name: DBO_CPC_TB_VARIANCES_SOURCE_LIST
+        description: "Care plan variance reason definitions"
+      - name: DBO_CPC_PA_WOUND_TYPE
+        description: "Wound type classification definitions"
+      - name: DBO_PDGMDIAGNOSISGROUPNCOMORBIDITYDEF
+        description: "PDGM diagnosis group and comorbidity definitions"
+      - name: DBO_CODINGSTATIONOASISASSESSMENT
+        description: "MyScrubberQA OASIS assessment records"
+      - name: DBO_CODINGSTATIONOASISASSESSMENTRECOMMENDATION
+        description: "MyScrubberQA coding recommendations"
+      - name: DBO_CODINGSTATIONOASISASSESSMENTSCRUBBERALERTS
+        description: "MyScrubberQA scrubber alerts"
+      - name: DBO_CODINGSTATIONRETURNEDASSESSMENTS
+        description: "MyScrubberQA returned assessment tracking"
+      - name: DBO_ECLAIMSTRANSMISSION
+        description: "Electronic claims transmission records"
+      - name: DBO_ELIGIBILITYALERTTYPE
+        description: "Eligibility alert type definitions"
+      - name: DBO_ELIGIBILITYFREQUENCYTYPE
+        description: "Eligibility check frequency type definitions"
+      - name: DBO_ELIGIBILITYSETTING
+        description: "Company eligibility verification settings"
+      - name: DBO_EMPLOYEEPRODUCTIVITYPOINTS
+        description: "Employee productivity point configurations"
+      - name: DBO_PRODUCTIVITYCODETYPES
+        description: "Productivity code type definitions"
+      - name: DBO_HIS_DATA
+        description: "Hospice Information Set (HIS) assessment data"
+      - name: DBO_HIS_NQF_DATA
+        description: "HIS NQF quality measure results"
+      - name: DBO_HOPE_HEADER
+        description: "HOPE assessment header records"
+      - name: DBO_HOPE_DETAILS
+        description: "HOPE assessment detail values"
+      - name: DBO_HOPE_DETAILS_HISTORY
+        description: "HOPE detail change history"
+      - name: DBO_HOPE_STATUS
+        description: "HOPE assessment status history"
+      - name: DBO_HOPE_RESPONSE
+        description: "HOPE submission response records"
+      - name: DBO_HOPE_SECTIONS
+        description: "HOPE section definitions"
+      - name: DBO_HOPE_QUESTIONS
+        description: "HOPE question definitions"
+      - name: DBO_HOPE_ITEMS
+        description: "HOPE item definitions"
+      - name: DBO_HOPE_ITEM_VALUES
+        description: "HOPE item value/answer definitions"
+      - name: DBO_HOPE_VERSIONS
+        description: "HOPE version definitions"
+      - name: HH_PATIENTINFECTION
+        description: "Patient infection records"
+      - name: HH_PATIENTINFECTIONDATA
+        description: "Extended patient infection data (location, treatment, precautions)"
+      - name: HH_PATIENTINFECTIONASSESSMENT
+        description: "Patient infection assessment records"
+      - name: HH_PATIENTINFECTIONASSESSMENTANSWER
+        description: "Infection assessment question answers"
+      - name: HH_INFECTIONTYPE
+        description: "Infection type definitions"
+      - name: HH_INFECTIONSTATUS
+        description: "Infection status definitions"
+      - name: HH_INFECTIONSOURCE
+        description: "Infection source definitions"
+      - name: HH_INFECTIONORGANISM
+        description: "Infection organism definitions"
+      - name: HH_INFECTIONISOLATIONMEASURES
+        description: "Infection isolation measure definitions"
+      - name: HH_INTERDISCIPLINARYGROUP
+        description: "IDG team definitions"
+      - name: HH_INTERDISCIPLINARYGROUPFREQUENCY
+        description: "IDG meeting frequency configuration"
+      - name: HH_INTERDISCIPLINARYGROUPMEETING
+        description: "IDG meeting instances"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGEMPLOYEE
+        description: "IDG meeting employee attendance and signatures"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGPATIENT
+        description: "IDG meeting patient review records"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGPREPNOTE
+        description: "IDG meeting prep notes per patient"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGCHUNKS
+        description: "IDG meeting note text chunks"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGCOMMENT
+        description: "IDG meeting status comments"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGNOTEOPTION
+        description: "IDG meeting note section options"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGNOTECONFIGURATIONOPTION
+        description: "IDG meeting note section configuration per LOB"
+      - name: HH_INTERDISCIPLINARYGROUPMEETINGPATIENTADDITIONALNOTE
+        description: "IDG meeting additional patient notes"
+      - name: HH_PATIENTINTERDISCIPLINARYGROUP
+        description: "Patient-to-IDG assignments"
+      - name: HH_PDGMEPISODES
+        description: "PDGM episodes (60-day periods)"
+      - name: HH_PDGMPERIODS
+        description: "PDGM 30-day payment periods with HIPPS codes"
+      - name: HH_PATIENTWOUNDASSESSMENTANSWER
+        description: "Wound assessment template answers"
+      - name: HH_TEMPLATECATEGORY
+        description: "Template category definitions for LOB filtering"
+      - name: HH_TEMPLATETEMPLATECATEGORY
+        description: "Template-to-category associations"
+      - name: HH_BRANCH
+        description: "Branch/office location definitions"
+      - name: HH_PATIENTBRANCHES
+        description: "Patient-to-branch assignments"
+      - name: HH_EMPLOYEEBRANCHES
+        description: "Employee-to-branch assignments"
+      - name: HH_HOSPICEELECTIONADDENDUM
+        description: "Hospice election addendum documents"
+      - name: HH_HOSPICEELECTIONADDENDUM_STATUS
+        description: "Hospice election addendum status history"
+      - name: HH_HOSPICEELECTIONADDENDUMNONCOVEREDMED
+        description: "Non-covered medications in election addendum"
+      - name: HH_HOSPICEELECTIONADDENDUMNONCOVEREDITEMSSERVICES
+        description: "Non-covered items/services in election addendum"
+      - name: HH_HOSPICEELECTIONADDENDUMNONTERMINALADDITIONALINFO
+        description: "Non-terminal diagnosis info in election addendum"
+      - name: HH_HOSPICEELECTIONADDENDUMNOTEDATE
+        description: "Election addendum note dates"
+      - name: HHPAYROLL_PAYPERIOD
+        description: "Payroll pay period definitions"
+      - name: HHPAYROLL_PAYPERIODACTIVITY
+        description: "Payroll period activity records (visits, time, mileage)"
+      - name: HHPAYROLL_PAYCYCLE_BUSINESSUNITLINK
+        description: "Pay cycle to business unit associations"
+      - name: INPATIENT_INPATIENTENCOUNTERS
+        description: "Inpatient encounter records"
+      - name: INPATIENT_HOPE_PATIENTENCOUNTER
+        description: "HOPE patient encounter assessment answers"
+      - name: RCD_PCRSUBMISSION
+        description: "Pre-Claim Review (PCR) submission records"
+      - name: RCD_PCRSUBMISSIONHISTORY
+        description: "PCR submission status history"
+      - name: RCD_PCRTASKADMIN
+        description: "PCR task administration settings"
+      - name: WORKFLOW_TASKTYPES
+        description: "Workflow task/alert type definitions"
+      - name: WORKFLOW_TASKTYPESETTINGS
+        description: "Workflow task type visibility settings"

@@ -1,0 +1,280 @@
+version: 2
+
+models:
+  - name: int_patients_deduplicated
+    description: "SCD Type 2 patient records - preserves history with effective_from/to dates, validates age, standardizes zip codes"
+    columns:
+      - name: patient_id
+        description: "Natural key - patient identifier (appears in multiple rows for history)"
+        tests:
+          - not_null
+      - name: is_current
+        description: "True for the latest version of the patient record"
+        tests:
+          - not_null
+
+  - name: int_episodes_deduplicated
+    description: "Deduplicated episodes joined with admissions + discharges for full lifecycle tracking"
+    columns:
+      - name: episode_id
+        description: "Primary key - deduplicated episode identifier"
+        tests:
+          - not_null
+          - unique
+      - name: episode_lifecycle_status
+        description: "Derived lifecycle status: ACTIVE, DISCHARGED, REVOKED"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['ACTIVE', 'DISCHARGED', 'REVOKED', 'PENDING', 'CLOSED', 'EXPIRED']
+      - name: patient_id
+        tests:
+          - not_null
+      - name: episode_start_date
+        tests:
+          - not_null
+
+  - name: int_admissions_deduplicated
+    description: "Deduplicated admission records"
+    columns:
+      - name: admission_id
+        description: "Primary key - deduplicated admission identifier"
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - not_null
+      - name: admission_date
+        tests:
+          - not_null
+
+  - name: int_discharges_deduplicated
+    description: "Deduplicated discharge records"
+    columns:
+      - name: discharge_id
+        description: "Primary key - deduplicated discharge identifier"
+        tests:
+          - not_null
+          - unique
+      - name: discharge_date
+        tests:
+          - not_null
+
+  - name: int_census_deduplicated
+    description: "Deduplicated census with pivoted level-of-care counts and percentages per facility/date"
+    columns:
+      - name: census_id
+        description: "Primary key - deduplicated census identifier"
+        tests:
+          - not_null
+          - unique
+      - name: census_date
+        tests:
+          - not_null
+      - name: facility_daily_census
+        description: "Total patient count at facility for that date"
+        tests:
+          - not_null
+      - name: facility_routine_pct
+        description: "Percentage of routine LOC patients at facility (.## format)"
+
+  - name: int_referrals_deduplicated
+    description: "Deduplicated referrals with conversion metrics"
+    columns:
+      - name: referral_id
+        description: "Primary key - deduplicated referral identifier"
+        tests:
+          - not_null
+          - unique
+      - name: referral_date
+        tests:
+          - not_null
+
+  - name: int_referral_to_admission_funnel
+    description: "Referral-to-admission funnel joining referrals with admissions for conversion analysis"
+    columns:
+      - name: referral_id
+        description: "Primary key - referral identifier"
+        tests:
+          - not_null
+          - unique
+      - name: funnel_stage
+        description: "Derived funnel stage: CONVERTED, DECLINED, PENDING, or original status"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CONVERTED', 'DECLINED', 'PENDING', 'ACCEPTED', 'CANCELLED', 'WITHDRAWN']
+      - name: referral_date
+        tests:
+          - not_null
+
+  - name: int_facilities_deduplicated
+    description: "Deduplicated facility records"
+    columns:
+      - name: facility_id
+        description: "Primary key - deduplicated facility identifier"
+        tests:
+          - not_null
+          - unique
+      - name: facility_name
+        tests:
+          - not_null
+
+  - name: int_staff_deduplicated
+    description: "Deduplicated staff records"
+    columns:
+      - name: staff_id
+        description: "Primary key - deduplicated staff identifier"
+        tests:
+          - not_null
+          - unique
+      - name: discipline
+        tests:
+          - not_null
+
+  - name: int_visits_deduplicated
+    description: "Deduplicated visits joined with staff, anomaly flags for time/mileage, duration in hours (.## format)"
+    columns:
+      - name: visit_id
+        description: "Primary key - deduplicated visit identifier"
+        tests:
+          - not_null
+          - unique
+      - name: visit_date
+        tests:
+          - not_null
+      - name: discipline
+        tests:
+          - not_null
+      - name: has_time_anomaly
+        description: "True if visit_end_time < visit_start_time"
+        tests:
+          - not_null
+      - name: has_mileage_anomaly
+        description: "True if mileage < 0 or > 500"
+        tests:
+          - not_null
+
+  - name: int_billing_deduplicated
+    description: "Deduplicated billing joined with episodes, negative amounts zeroed, rates in .## format, date anomaly flags"
+    columns:
+      - name: claim_id
+        description: "Primary key - deduplicated claim identifier"
+        tests:
+          - not_null
+          - unique
+      - name: billed_amount
+        tests:
+          - not_null
+      - name: payment_rate
+        description: "paid_amount / billed_amount in .## format"
+        tests:
+          - not_null
+      - name: has_date_anomaly
+        description: "True if payment_date < submission_date"
+        tests:
+          - not_null
+      - name: service_from_date
+        tests:
+          - not_null
+
+  - name: int_budget_deduplicated
+    description: "Deduplicated budget with cleaned numerics, derived margin metrics, percentages in .## format"
+    columns:
+      - name: budget_id
+        description: "Primary key - deduplicated budget identifier"
+        tests:
+          - not_null
+          - unique
+      - name: budget_date
+        tests:
+          - not_null
+      - name: revenue_budget
+        tests:
+          - not_null
+      - name: margin_pct
+        description: "Net margin as percentage in .## format"
+        tests:
+          - not_null
+
+  - name: int_budget_unpivoted
+    description: "Budget metrics unpivoted into rows for flexible analysis (metric_name + metric_value)"
+    columns:
+      - name: budget_id
+        description: "Budget record identifier"
+        tests:
+          - not_null
+      - name: metric_name
+        description: "Budget metric name (e.g. ADC_BUDGET, REVENUE_BUDGET, MARGIN_PCT)"
+        tests:
+          - not_null
+      - name: metric_value
+        tests:
+          - not_null
+
+  - name: int_seed_patients_deduplicated
+    description: "Deduplicated seed patients with hash key for change detection"
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null
+
+  - name: int_seed_admissions_deduplicated
+    description: "Deduplicated seed admissions with hash key"
+    columns:
+      - name: admission_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null
+
+  - name: int_seed_episodes_deduplicated
+    description: "Deduplicated seed episodes with hash key"
+    columns:
+      - name: episode_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null
+
+  - name: int_seed_visits_deduplicated
+    description: "Deduplicated seed visits with hash key"
+    columns:
+      - name: visit_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null
+
+  - name: int_seed_facilities_deduplicated
+    description: "Deduplicated seed facilities with hash key"
+    columns:
+      - name: facility_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null
+
+  - name: int_seed_staff_deduplicated
+    description: "Deduplicated seed staff with hash key"
+    columns:
+      - name: staff_id
+        tests:
+          - not_null
+          - unique
+      - name: _hash_key
+        tests:
+          - not_null

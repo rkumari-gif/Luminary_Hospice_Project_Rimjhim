@@ -1,0 +1,155 @@
+version: 2
+
+models:
+  - name: fact_census
+    description: "Daily census fact with facility and payer dimensions"
+    columns:
+      - name: pk_census
+        description: "Primary key - SHA2 hash of census_id"
+        tests:
+          - not_null
+          - unique
+      - name: census_id
+        description: "Natural key - MatrixCare census identifier"
+        tests:
+          - not_null
+          - unique
+      - name: census_date
+        tests:
+          - not_null
+      - name: patient_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_patients')
+              field: patient_id
+
+  - name: fact_admissions
+    description: "Admission events linked to referrals and episodes"
+    columns:
+      - name: pk_admission
+        description: "Primary key - SHA2 hash of admission_id"
+        tests:
+          - not_null
+          - unique
+      - name: admission_id
+        description: "Natural key - MatrixCare admission identifier"
+        tests:
+          - not_null
+          - unique
+      - name: admission_date
+        tests:
+          - not_null
+      - name: patient_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_patients')
+              field: patient_id
+
+  - name: fact_discharges
+    description: "Discharge events with disposition and length of stay"
+    columns:
+      - name: pk_discharge
+        description: "Primary key - SHA2 hash of discharge_id"
+        tests:
+          - not_null
+          - unique
+      - name: discharge_id
+        description: "Natural key - MatrixCare discharge identifier"
+        tests:
+          - not_null
+          - unique
+      - name: discharge_date
+        tests:
+          - not_null
+
+  - name: fact_referrals
+    description: "Referral pipeline with conversion metrics and timing"
+    columns:
+      - name: pk_referral
+        description: "Primary key - SHA2 hash of referral_id"
+        tests:
+          - not_null
+          - unique
+      - name: referral_id
+        description: "Natural key - MatrixCare referral identifier"
+        tests:
+          - not_null
+          - unique
+      - name: referral_date
+        tests:
+          - not_null
+      - name: is_converted
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+  - name: fact_episodes
+    description: "Hospice episodes with certification and benefit period tracking"
+    columns:
+      - name: pk_episode
+        description: "Primary key - SHA2 hash of episode_id"
+        tests:
+          - not_null
+          - unique
+      - name: episode_id
+        description: "Natural key - MatrixCare episode identifier"
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - not_null
+
+  - name: fact_visits
+    description: "Visit logs with duration calculation by discipline"
+    columns:
+      - name: pk_visit
+        description: "Primary key - SHA2 hash of visit_id"
+        tests:
+          - not_null
+          - unique
+      - name: visit_id
+        description: "Natural key - MatrixCare visit identifier"
+        tests:
+          - not_null
+          - unique
+      - name: visit_date
+        tests:
+          - not_null
+
+  - name: fact_billing
+    description: "Billing claims with payment timing and denial tracking"
+    columns:
+      - name: pk_billing
+        description: "Primary key - SHA2 hash of claim_id"
+        tests:
+          - not_null
+          - unique
+      - name: claim_id
+        description: "Natural key - MatrixCare claim identifier"
+        tests:
+          - not_null
+          - unique
+      - name: billed_amount
+        tests:
+          - not_null
+
+  - name: fact_budget
+    description: "Monthly budget targets by facility for variance analysis"
+    columns:
+      - name: pk_budget
+        description: "Primary key - SHA2 hash of budget_id"
+        tests:
+          - not_null
+          - unique
+      - name: budget_id
+        description: "Natural key - budget record identifier"
+        tests:
+          - not_null
+          - unique
+      - name: budget_date
+        tests:
+          - not_null
